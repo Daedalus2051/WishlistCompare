@@ -30,7 +30,8 @@ namespace WishlistCompare
             HtmlParser par = new HtmlParser();
             //txtDisplay.Text = par.GetWishlistGameNames();
             //txtDisplay.Text = par.GetWishlistGameRank();
-            txtDisplay.Text = par.CombineGameAndRank();
+            //txtDisplay.Text = par.CombineGameAndRank();
+            txtDisplay.Text = par.GetGamesAndRanksFromURL("http://steamcommunity.com/profiles/76561197972289481/wishlist");
         }
     }
 }
