@@ -28,10 +28,9 @@ namespace WishlistCompare
         private void btnLoad_Click(object sender, RoutedEventArgs e)
         {
             HtmlParser par = new HtmlParser();
-            //txtDisplay.Text = par.GetWishlistGameNames();
-            //txtDisplay.Text = par.GetWishlistGameRank();
             //txtDisplay.Text = par.CombineGameAndRank();
-            txtDisplay.Text = par.GetGamesAndRanksFromURL("http://steamcommunity.com/profiles/76561197972289481/wishlist");
+            //txtDisplay.Text = par.GetGamesAndRanksFromURL( txtWishlistURL.Text );
+            dgMain.ItemsSource = GameEntryObject.GetGameData(txtWishlistURL.Text);
         }
 
         private void btnDebug_Click(object sender, RoutedEventArgs e)
