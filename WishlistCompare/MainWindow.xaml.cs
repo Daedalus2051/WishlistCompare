@@ -33,5 +33,10 @@ namespace WishlistCompare
             //txtDisplay.Text = par.CombineGameAndRank();
             txtDisplay.Text = par.GetGamesAndRanksFromURL("http://steamcommunity.com/profiles/76561197972289481/wishlist");
         }
+
+        private void btnDebug_Click(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("Testing the most awesome test of all the tests!");
+        }
     }
 }
