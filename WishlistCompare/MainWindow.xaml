@@ -15,7 +15,8 @@
 
         <StackPanel Grid.ColumnSpan="2">
             <TextBox Margin="5"
-                     Name="txtWishlistURL">http://steamcommunity.com/profiles/76561197972289481/wishlist</TextBox>
+                     Name="txtWishlistURL">http://steamcommunity.com/profiles/76561198054936911/wishlist/</TextBox>
+            <!--http://steamcommunity.com/profiles/76561197972289481/wishlist - My wishlist -->
             <StackPanel Orientation="Horizontal">
                 <Button Margin="5" Width="120" 
                         Name="btnLoad"
@@ -28,8 +29,24 @@
         
         <DataGrid Name="dgMain" Grid.Row="1" Grid.ColumnSpan="2"
                   AlternatingRowBackground="LightBlue"
-                  AlternationCount="2" >
-            
+                  AlternationCount="2"
+                  AutoGenerateColumns="False" >
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name"
+                                    Binding="{Binding Name}" />
+                <DataGridTextColumn Header="Rank"
+                                    Binding="{Binding Rank}" />
+                <DataGridTextColumn Header="Original Price"
+                                    Binding="{Binding OriginalPrice}" />
+                <DataGridTextColumn Header="Sale Price"
+                                    Binding="{Binding SalePrice}" />
+                <DataGridTextColumn Header="Sale Percent"
+                                    Binding="{Binding SalePercent}" />
+                <DataGridTextColumn Header="Lowest Regular Price"
+                                    Binding="{Binding LowestRegularPrice}" />
+                <DataGridTextColumn Header="Lowest Sale Price"
+                                    Binding="{Binding LowestSalePrice}" />
+            </DataGrid.Columns>
         </DataGrid>
 
     </Grid>

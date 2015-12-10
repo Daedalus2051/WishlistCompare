@@ -16,6 +16,7 @@ namespace WishlistCompare
         #region Properties
         private string _name;
         private int _rank;
+        private int _gameID;
         private decimal _originalPrice = 0.0m;
         private decimal _salePrice = 0.0m;
         private decimal _salePct = -0;
@@ -24,6 +25,7 @@ namespace WishlistCompare
         private CultureInfo culture = new CultureInfo(CultureInfo.CurrentCulture.Name, false);
         private NumberStyles style_sales = NumberStyles.Number | NumberStyles.AllowCurrencySymbol;
         private NumberStyles style_pct = NumberStyles.Number | NumberStyles.AllowLeadingSign | NumberStyles.AllowTrailingSign;
+        private ObservableCollection<GameEntryObject> _collectedData;
 
         /// <summary>
         /// Name of the game.
@@ -47,6 +49,16 @@ namespace WishlistCompare
             {
                 if (!(Int32.TryParse(value, out _rank)))
                     _rank = -1;
+                RaisePropertyChanged();
+            }
+        }
+        public string GameID
+        {
+            get { return _gameID.ToString(); }
+            set
+            {
+                if (!(Int32.TryParse(value, out _gameID)))
+                    _gameID = -1;
                 RaisePropertyChanged();
             }
         }
@@ -90,7 +102,7 @@ namespace WishlistCompare
             }
         }
         /// <summary>
-        /// Not yet implemented
+        /// The lowest regular price that was found from SteamPrices.com
         /// </summary>
         public string LowestRegularPrice
         {
@@ -103,7 +115,7 @@ namespace WishlistCompare
             }
         }
         /// <summary>
-        /// Not yet implemented
+        /// The lowest sale price that was found from SteamPrices.com
         /// </summary>
         public string LowestSalePrice
         {
@@ -112,6 +124,18 @@ namespace WishlistCompare
             {
                 if (!(Decimal.TryParse(value, style_sales, culture, out _lowestSalePrice)))
                     _lowestSalePrice = -1.0m;
+                RaisePropertyChanged();
+            }
+        }
+        /// <summary>
+        /// Observable collection of GameEntryObjects; only populated after running the async method to gather data.
+        /// </summary>
+        public ObservableCollection<GameEntryObject> CollectedGameData
+        {
+            get { return _collectedData; }
+            set
+            {
+                _collectedData = value;
                 RaisePropertyChanged();
             }
         }
@@ -125,6 +149,7 @@ namespace WishlistCompare
         }
         #endregion
         #region Methods
+        //public void GetGameData(string url) // Leaving this here for when I figure out what is wrong with the async call
         public static ObservableCollection<GameEntryObject> GetGameData(string url)
         {
             var gameData = new ObservableCollection<GameEntryObject>();
@@ -136,15 +161,20 @@ namespace WishlistCompare
             // Parse the data and put it in the object
             foreach (string raw in rawData)
             {
-                //  {0}   |   {1}   |      {2}     |    {3}   |     {4}    |      {5}      |      {6}
-                //gameName, gameRank, originalPrice, salePrice, salePercent, lowestRegPrice, lowestSalePrice - separated by '|'
+                //  {0}   |   {1}   |      {2}     |    {3}   |     {4}    |      {5}      |      {6}       |   {7}
+                //gameName, gameRank, originalPrice, salePrice, salePercent, lowestRegPrice, lowestSalePrice, gameID - separated by '|'
                 string[] gameObjData = raw.Split('|');
                 gameData.Add(new GameEntryObject() { Name = gameObjData[0], Rank = gameObjData[1], OriginalPrice = gameObjData[2], SalePrice = gameObjData[3],
-                    SalePercent = gameObjData[4], LowestRegularPrice = gameObjData[5], LowestSalePrice = gameObjData[6] });
+                    SalePercent = gameObjData[4], LowestRegularPrice = gameObjData[5], LowestSalePrice = gameObjData[6], GameID = gameObjData[7]});
             }
             
             // Return data to caller
+            //CollectedGameData = gameData;
             return gameData;
+        }
+        public async void GetGameDataAsync(string url)
+        {
+            await Task.Run( () => GetGameData(url) );
         }
         #endregion
     }
