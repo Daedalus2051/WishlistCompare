@@ -32,17 +32,18 @@ namespace WishlistCompare
             //txtDisplay.Text = par.CombineGameAndRank();
             //txtDisplay.Text = par.GetGamesAndRanksFromURL( txtWishlistURL.Text );
             
-            dgMain.ItemsSource = GameEntryObject.GetGameData(txtWishlistURL.Text);
+            //dgMain.ItemsSource = GameEntryObject.GetGameData(txtWishlistURL.Text);
             
-            //gameData.GetGameDataAsync(txtWishlistURL.Text);
-            //dgMain.ItemsSource = gameData.CollectedGameData;
+            gameData.GetGameDataAsync(txtWishlistURL.Text);
+            dgMain.ItemsSource = gameData.CollectedGameData;
         }
 
         private void btnDebug_Click(object sender, RoutedEventArgs e)
         {
-            //Console.WriteLine("Testing the most awesome test of all the tests!");
+            Console.WriteLine("Testing the most awesome test of all the tests!");
+            /*
             GameEntryObject test = (GameEntryObject)dgMain.SelectedItem;
-            MessageBox.Show(String.Format("Name: {0}\nID: {1}", test.Name, test.GameID));
+            MessageBox.Show(String.Format("Name: {0}\nID: {1}", test.Name, test.GameID)); */
         }
     }
 }
