@@ -34,8 +34,9 @@ namespace WishlistCompare
             
             //dgMain.ItemsSource = GameEntryObject.GetGameData(txtWishlistURL.Text);
             
-            gameData.GetGameDataAsync(txtWishlistURL.Text);
-            dgMain.ItemsSource = gameData.CollectedGameData;
+            //gameData.GetGameDataAsync(txtWishlistURL.Text);
+            //dgMain.ItemsSource = gameData.CollectedGameData;
+
         }
 
         private void btnDebug_Click(object sender, RoutedEventArgs e)

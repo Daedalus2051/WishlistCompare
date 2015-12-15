@@ -22,13 +22,18 @@ namespace WishlistCompare
 {
     class HtmlParser
     {
-        public List<string> GetWishlistGameData(string url)
+        /// <summary>
+        /// Returns raw data delimited by pipes for all games that appear on the user's wishlist
+        /// </summary>
+        /// <param name="url">Steam Wishlist URL</param>
+        /// <returns> {0}gameName|{1}gameRank|{2}originalPrice|{3}salePrice|{4}salePercent|{5}lowestRegPrice|{6}lowestSalePrice|{7}gameID </returns>
+        public List<string> GetWishlistGameData(string url, bool getPriceData=false)
         {
             // Declaration
             List<string> rawData = new List<string>();
             WebClient client = new WebClient();
             string htmlCode = client.DownloadString(url); // get the raw HTML page returned from the URL call
-            string gameName, gameRank, originalPrice = "$0.00", salePrice = "$0.00", salePercent = "-0", lowestRegPrice, lowestSalePrice;
+            string gameName, gameRank, originalPrice = "$0.00", salePrice = "$0.00", salePercent = "-0", lowestRegPrice = "$0.00", lowestSalePrice = "$0.00";
             string gameID;
 
             HtmlDocument hdoc = new HtmlDocument();
@@ -83,10 +88,14 @@ namespace WishlistCompare
                     salePercent = "-0";
                 }
 
-                // Get lowest price data
-                string[] prices = GetLowestPrices(gameID).Split(':');
-                lowestRegPrice = prices[0];
-                lowestSalePrice = prices[1];
+                // If specified we should get the price data... if not it can be collected later.
+                if (getPriceData)
+                {
+                    // Get lowest price data
+                    string[] prices = GetLowestPrices(gameID).Split(':');
+                    lowestRegPrice = prices[0];
+                    lowestSalePrice = prices[1];
+                }
 
                 // Put the data into the collection
                 rawData.Add( String.Format("{0}|{1}|{2}|{3}|{4}|{5}|{6}|{7}", gameName, gameRank, originalPrice, salePrice, salePercent, lowestRegPrice, lowestSalePrice, gameID) );
@@ -94,6 +103,11 @@ namespace WishlistCompare
 
             return rawData;
         }
+        /// <summary>
+        /// This method gets the lowest price data [if available] from www.steamprices.com
+        /// </summary>
+        /// <param name="steamGameId">Steam Game ID</param>
+        /// <returns>Returns a string colon delimited containing the lowest regular price and lowest sale price (i.e. $14.99:$4.99)</returns>
         public string GetLowestPrices(string steamGameId)
         {
             WebClient client = new WebClient();
@@ -111,7 +125,7 @@ namespace WishlistCompare
                 // If there's a 404 error, the issue might be DLC (which is a different link)
                 if (wex.Message.Contains("404"))
                 {
-                    steampricesUrl = "https://www.steamprices.com/us/dlc/" + steamGameId;
+                    steampricesUrl = @"https://www.steamprices.com/us/dlc/" + steamGameId;
                     try
                     {
                         pricesHtml = client.DownloadString(steampricesUrl);
@@ -206,5 +220,6 @@ namespace WishlistCompare
 
             return lowRegPrice + ":" + lowSalePrice;
         }
+
     }
 }
