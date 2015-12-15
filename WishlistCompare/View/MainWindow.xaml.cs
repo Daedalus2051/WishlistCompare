@@ -27,8 +27,10 @@ namespace WishlistCompare
 
         private void btnLoad_Click(object sender, RoutedEventArgs e)
         {
-            HtmlParser par = new HtmlParser();
-            GameEntryObject gameData = new GameEntryObject();
+            WishlistCompare.ViewModel.GameEntryViewModel gevm = new ViewModel.GameEntryViewModel();
+            //HtmlParser par = new HtmlParser();
+            //GameEntryObject gameData = new GameEntryObject();
+            
             //txtDisplay.Text = par.CombineGameAndRank();
             //txtDisplay.Text = par.GetGamesAndRanksFromURL( txtWishlistURL.Text );
             
@@ -36,6 +38,9 @@ namespace WishlistCompare
             
             //gameData.GetGameDataAsync(txtWishlistURL.Text);
             //dgMain.ItemsSource = gameData.CollectedGameData;
+
+            gevm.PopulateData(txtWishlistURL.Text);
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => dgMain.ItemsSource = gevm.gameObjectData));
 
         }
 

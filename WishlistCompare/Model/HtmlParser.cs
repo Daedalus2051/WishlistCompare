@@ -221,5 +221,27 @@ namespace WishlistCompare
             return lowRegPrice + ":" + lowSalePrice;
         }
 
+        public void GetLowestPriceByBatch(GameEntryObject[] geoArray, int batchLimit = 5, int sleepTime = 15)
+        {
+            int sleepTimeAmt = sleepTime * 1000;
+            int batchCounter = 1;
+
+            foreach (GameEntryObject gameData in geoArray)
+            {
+                string[] lowestPriceData = GetLowestPrices(gameData.GameID).Split(':');
+                gameData.LowestRegularPrice = lowestPriceData[0]; //lowestRegPrice 
+                gameData.LowestSalePrice= lowestPriceData[1]; //lowestSalePrice 
+
+                if (batchCounter >= batchLimit)
+                {
+                    System.Threading.Thread.Sleep(sleepTimeAmt);
+                    batchCounter = 1;
+                }
+                else
+                {
+                    batchCounter++;
+                }
+            }
+        }
     }
 }
