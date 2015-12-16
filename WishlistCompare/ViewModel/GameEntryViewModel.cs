@@ -11,6 +11,7 @@ namespace WishlistCompare.ViewModel
     class GameEntryViewModel
     {
         public ObservableCollection<GameEntryObject> gameObjectData = new ObservableCollection<GameEntryObject>();
+        public ObservableCollection<GameEntryObject> gameObjectData2 = new ObservableCollection<GameEntryObject>();
         public HtmlParser hParser = new HtmlParser();
 
         public void GetWishlistGames(string wishlistUrl)
@@ -43,7 +44,7 @@ namespace WishlistCompare.ViewModel
 
             foreach (GameEntryObject geo in gameDataArray)
             {
-                gameObjectData.Add(new GameEntryObject()
+                gameObjectData2.Add(new GameEntryObject()
                 {
                     Name = geo.Name,
                     Rank = geo.Rank,
@@ -55,7 +56,17 @@ namespace WishlistCompare.ViewModel
                     GameID = geo.GameID
                 });
             }
+            Console.WriteLine("GetWishlist method complete");
         }
+
+        public void LoadDatagrid()
+        {
+            foreach (var x in gameObjectData2)
+            {
+                gameObjectData.Add(x);
+            }
+        }
+
 
         public async void PopulateData(string wishlistURL)
         {

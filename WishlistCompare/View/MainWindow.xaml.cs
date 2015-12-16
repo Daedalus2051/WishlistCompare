@@ -20,6 +20,8 @@ namespace WishlistCompare
     /// </summary>
     public partial class MainWindow : Window
     {
+        WishlistCompare.ViewModel.GameEntryViewModel gevm = new ViewModel.GameEntryViewModel();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -27,7 +29,6 @@ namespace WishlistCompare
 
         private void btnLoad_Click(object sender, RoutedEventArgs e)
         {
-            WishlistCompare.ViewModel.GameEntryViewModel gevm = new ViewModel.GameEntryViewModel();
             //HtmlParser par = new HtmlParser();
             //GameEntryObject gameData = new GameEntryObject();
             
@@ -39,14 +40,16 @@ namespace WishlistCompare
             //gameData.GetGameDataAsync(txtWishlistURL.Text);
             //dgMain.ItemsSource = gameData.CollectedGameData;
 
-            gevm.PopulateData(txtWishlistURL.Text);
-            Application.Current.Dispatcher.BeginInvoke(new Action(() => dgMain.ItemsSource = gevm.gameObjectData));
+            
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => gevm.PopulateData(txtWishlistURL.Text)));
+            dgMain.ItemsSource = gevm.gameObjectData;
 
         }
 
         private void btnDebug_Click(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("Testing the most awesome test of all the tests!");
+            gevm.LoadDatagrid();
             /*
             GameEntryObject test = (GameEntryObject)dgMain.SelectedItem;
             MessageBox.Show(String.Format("Name: {0}\nID: {1}", test.Name, test.GameID)); */
