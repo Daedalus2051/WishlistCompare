@@ -15,8 +15,9 @@
 
         <StackPanel Grid.ColumnSpan="2">
             <TextBox Margin="5"
-                     Name="txtWishlistURL">http://steamcommunity.com/profiles/76561198054936911/wishlist/</TextBox>
+                     Name="txtWishlistURL">http://steamcommunity.com/profiles/76561197972289481/wishlist</TextBox>
             <!--http://steamcommunity.com/profiles/76561197972289481/wishlist - My wishlist -->
+            <!--http://steamcommunity.com/profiles/76561198054936911/wishlist/ - Michelle's wishlist -->
             <StackPanel Orientation="Horizontal">
                 <Button Margin="5" Width="120" 
                         Name="btnLoad"

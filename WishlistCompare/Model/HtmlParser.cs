@@ -110,6 +110,7 @@ namespace WishlistCompare
         /// <returns>Returns a string colon delimited containing the lowest regular price and lowest sale price (i.e. $14.99:$4.99)</returns>
         public string GetLowestPrices(string steamGameId)
         {
+            Console.WriteLine("[DEBUG]::(GetLowestPrices) Attempting to get price data for gameID: {0}", steamGameId);
             WebClient client = new WebClient();
             string steampricesUrl = @"https://www.steamprices.com/us/app/";
             string pricesHtml = ""; string lowRegPrice = "", lowSalePrice = "";
@@ -234,6 +235,7 @@ namespace WishlistCompare
 
                 if (batchCounter >= batchLimit)
                 {
+                    Console.WriteLine("[DEBUG]::(GetLowestPriceByBatch) Batch of {1} completed. Entering pause for {0} seconds...", sleepTime.ToString(), batchLimit.ToString());
                     System.Threading.Thread.Sleep(sleepTimeAmt);
                     batchCounter = 1;
                 }

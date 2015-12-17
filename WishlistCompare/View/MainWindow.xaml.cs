@@ -48,7 +48,7 @@ namespace WishlistCompare
 
         private void btnDebug_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Testing the most awesome test of all the tests!");
+            Console.WriteLine("Running LoadDatagrid method");
             gevm.LoadDatagrid();
             /*
             GameEntryObject test = (GameEntryObject)dgMain.SelectedItem;

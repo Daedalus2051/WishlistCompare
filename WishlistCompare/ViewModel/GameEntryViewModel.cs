@@ -36,8 +36,8 @@ namespace WishlistCompare.ViewModel
                 gameDataArray[aryCount].LowestRegularPrice = gameObjData[5];
                 gameDataArray[aryCount].LowestSalePrice = gameObjData[6];
                 gameDataArray[aryCount].GameID = gameObjData[7];
+                Console.WriteLine("Game[{1}] {0} added.", gameDataArray[aryCount].Name, aryCount);
                 aryCount++;
-
             }
 
             hParser.GetLowestPriceByBatch(gameDataArray);
