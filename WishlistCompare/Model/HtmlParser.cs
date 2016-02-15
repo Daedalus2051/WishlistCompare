@@ -57,7 +57,7 @@ namespace WishlistCompare
                 // <h4 class="ellipsis">Big Pharma</h4>
                 gameName = innerRow.DocumentNode.SelectSingleNode("//h4[@class]").InnerHtml.ToString();
                 if (String.IsNullOrEmpty(gameName))
-                    gameName = "[Error] No data for game name";
+                    gameName = "[Error] No data for game name - GameID: " + gameID;
                 // "//div[@class='wishlist_rank_ro']"
                 gameRank = innerRow.DocumentNode.SelectSingleNode("//div[@class='wishlist_rank_ro']").InnerHtml.ToString();
                 // Game price data
@@ -76,6 +76,7 @@ namespace WishlistCompare
 
                     // Scrub the percent... because it gives me problems
                     decimal pct = Convert.ToDecimal(salePercent.Replace('%', ' ').Trim());
+                    Console.WriteLine("[DEBUG]::(GetWishlistGameData) Decimal conversion yielded: {0}", pct.ToString());
                     pct = pct / 100;
                     salePercent = pct.ToString();
 
@@ -113,12 +114,13 @@ namespace WishlistCompare
             Console.WriteLine("[DEBUG]::(GetLowestPrices) Attempting to get price data for gameID: {0}", steamGameId);
             WebClient client = new WebClient();
             string steampricesUrl = @"https://www.steamprices.com/us/app/";
-            string pricesHtml = ""; string lowRegPrice = "", lowSalePrice = "";
+            string pricesHtml = ""; string lowRegPrice = "", lowSalePrice = "", priceHistory="";
             steampricesUrl = steampricesUrl + steamGameId;
 
             // Pull down the raw HTML as a string
             try
             {
+                Console.WriteLine("[DEBUG]::(GetLowestPrices[{0}]->DownloadString[{1}])_Execute", steamGameId, steampricesUrl);
                 pricesHtml = client.DownloadString(steampricesUrl);
             }
             catch (WebException wex)
@@ -127,6 +129,7 @@ namespace WishlistCompare
                 if (wex.Message.Contains("404"))
                 {
                     steampricesUrl = @"https://www.steamprices.com/us/dlc/" + steamGameId;
+                    Console.WriteLine("[DEBUG]::(GetLowestPrices:Exception) Hit 404 - Game not found. Trying DLC alt: {0}", steampricesUrl);
                     try
                     {
                         pricesHtml = client.DownloadString(steampricesUrl);
@@ -142,10 +145,12 @@ namespace WishlistCompare
             
             HtmlDocument lowestPriceData = new HtmlDocument();
             lowestPriceData.LoadHtml(pricesHtml);
+            Console.WriteLine("[DEBUG]::(GetLowestPrices) Loaded HTML Data - [{0} - {1}]", steamGameId, steampricesUrl);
 
             // Timeout delay because if you hit the site too hard it cries
             if (pricesHtml.Contains("Error 429 - Too Many Requests"))
             {
+                Console.WriteLine("[DEBUG]::(GetLowestPrices) Hit 429 - too many requests: retry after 10 seconds.");
                 System.Threading.Thread.Sleep((10 * 1000));
                 // Pull down the raw HTML as a string
                 try
@@ -175,41 +180,50 @@ namespace WishlistCompare
 
             // Get the Price History data
             //    //div[@id='history']
-            string priceHistory = lowestPriceData.DocumentNode.SelectSingleNode("//div[@id='history']").InnerHtml.ToString();
+            priceHistory = lowestPriceData.DocumentNode.SelectSingleNode("//div[@id='history']").InnerHtml.ToString();
             // For games that aren't released yet...
-            if (priceHistory.Contains("No price history"))
+            if (priceHistory.Contains("No price history") || priceHistory=="")
+            {
+                Console.WriteLine("[DEBUG]::(GetLowestPrices) GameID: {0} - No Price Data.", steamGameId);
                 return "0:0";
+            }
 
             HtmlDocument lowestPrices = new HtmlDocument();
             lowestPrices.LoadHtml(priceHistory);
+            Console.WriteLine("[DEBUG]::(GetLowestPrices) Loaded Lowest Price Data - [{0} - {1}]", steamGameId, steampricesUrl);
 
             // Gets us the single or double pair of prices
             //    //p[@class='nowrap']
-            HtmlNodeCollection priceData = lowestPrices.DocumentNode.SelectNodes("//p[@class='nowrap']");
+            HtmlNodeCollection priceData;
+            priceData = lowestPrices.DocumentNode.SelectNodes("//p[@class='nowrap']");
+            Console.WriteLine("[DEBUG]::(GetLowestPrices) Found low price history - [{0} - {1}]", steamGameId, steampricesUrl);
 
-            foreach (HtmlNode price in priceData)
+            if (priceData != null)
             {
-                HtmlNodeCollection spans = price.ChildNodes;
-                bool bRegFound = false;
-                bool bSaleFound = false;
-                foreach (HtmlNode span in spans)
+                foreach (HtmlNode price in priceData)
                 {
-                    switch (span.InnerText)
+                    HtmlNodeCollection spans = price.ChildNodes;
+                    bool bRegFound = false;
+                    bool bSaleFound = false;
+                    foreach (HtmlNode span in spans)
                     {
-                        case "Lowest regular price:":
-                            bRegFound = true;
-                            break;
-                        case "Lowest discount price:":
-                            bSaleFound = true;
-                            break;
-                    }
-                    
-                    if ((span.GetAttributeValue("class","") == "price value"))
-                    {
-                        if (bRegFound) { lowRegPrice = span.InnerText; bRegFound = false; }
-                        if (bSaleFound) { lowSalePrice = span.InnerText; bSaleFound = false; }
-                    }
+                        switch (span.InnerText)
+                        {
+                            case "Lowest regular price:":
+                                bRegFound = true;
+                                break;
+                            case "Lowest discount price:":
+                                bSaleFound = true;
+                                break;
+                        }
 
+                        if ((span.GetAttributeValue("class", "") == "price value"))
+                        {
+                            if (bRegFound) { lowRegPrice = span.InnerText; bRegFound = false; }
+                            if (bSaleFound) { lowSalePrice = span.InnerText; bSaleFound = false; }
+                        }
+
+                    }
                 }
             }
 
@@ -219,23 +233,26 @@ namespace WishlistCompare
             else
                 lowSalePrice = "0";
 
+            Console.WriteLine("[DEBUG]::(GetLowestPrices) Returning price data - [{0} - {1}]", steamGameId, (lowRegPrice + ":" + lowSalePrice));
             return lowRegPrice + ":" + lowSalePrice;
         }
 
-        public void GetLowestPriceByBatch(GameEntryObject[] geoArray, int batchLimit = 5, int sleepTime = 15)
+        public void GetLowestPriceByBatch(GameEntryObject[] geoArray, int batchLimit = 2, int sleepTime = 30)
         {
             int sleepTimeAmt = sleepTime * 1000;
             int batchCounter = 1;
+            int itemCounter = 0;
 
             foreach (GameEntryObject gameData in geoArray)
             {
                 string[] lowestPriceData = GetLowestPrices(gameData.GameID).Split(':');
                 gameData.LowestRegularPrice = lowestPriceData[0]; //lowestRegPrice 
                 gameData.LowestSalePrice= lowestPriceData[1]; //lowestSalePrice 
+                itemCounter++;
 
                 if (batchCounter >= batchLimit)
                 {
-                    Console.WriteLine("[DEBUG]::(GetLowestPriceByBatch) Batch of {1} completed. Entering pause for {0} seconds...", sleepTime.ToString(), batchLimit.ToString());
+                    Console.WriteLine("[DEBUG]::(GetLowestPriceByBatch) Batch of {1} completed, {2} of {3} processed so far. Entering pause for {0} seconds...", sleepTime.ToString(), batchLimit.ToString(), itemCounter, (geoArray.Length+1));
                     System.Threading.Thread.Sleep(sleepTimeAmt);
                     batchCounter = 1;
                 }
